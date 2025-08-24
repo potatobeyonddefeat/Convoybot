@@ -1,6 +1,7 @@
 const helpModule = require('../commands/general/help');
 const { notifyAdminError } = require('../utils/notifier');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
+const { createOneTimeInvite } = require('../utils/invite');
 
 module.exports = {
 	name: 'interactionCreate',
@@ -82,8 +83,14 @@ module.exports = {
 					const user = await interaction.client.users.fetch(userId).catch(() => null);
 					if (action === 'approve') {
 						await interaction.guild.bans.remove(userId, 'Appeal approved');
+						let inviteUrl = '';
+						try {
+							const { url } = await createOneTimeInvite(interaction.guild, interaction.client.config.invites?.preferredChannelId, 'Appeal approved reinvite');
+							inviteUrl = url;
+						} catch {}
 						await interaction.update({ content: `Appeal approved by ${interaction.user.tag}. User unbanned.`, components: [], embeds: interaction.message.embeds });
-						if (user) user.send(`Your appeal was approved in ${interaction.guild.name}. You have been unbanned.`).catch(() => {});
+						if (user) user.send(`Your appeal was approved in ${interaction.guild.name}. You have been unbanned.
+Rejoin link (24h, single-use): ${inviteUrl || 'Invite unavailable'}`).catch(() => {});
 						interaction.client.audit.log({ command: 'appeal.approve', actorId: interaction.user.id, actorTag: interaction.user.tag, target: `${user?.tag || userId}` });
 					} else if (action === 'deny') {
 						await interaction.update({ content: `Appeal denied by ${interaction.user.tag}.`, components: [], embeds: interaction.message.embeds });

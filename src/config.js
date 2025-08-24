@@ -58,6 +58,9 @@ module.exports = {
 			fields: ['Why should we lift your ban?', 'What happened?', 'Anything else we should know?'],
 		},
 	},
+	invites: {
+		preferredChannelId: process.env.INVITE_CHANNEL_ID || null,
+	},
 	logging: { level: 'info' },
 	audit: {
 		enabled: true,

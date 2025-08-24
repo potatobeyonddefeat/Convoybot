@@ -85,7 +85,7 @@
     },
     "raidMode": {
       "enabled": true,
-      "newAccountAgeDays": 100,
+      "newAccountAgeDays": 30,
       "restrictNewMembers": true,
       "action": "kick",
       "timeoutMinutes": 60,
@@ -107,6 +107,18 @@
     "placeholders": {
       "rules": "#rules",
       "introductions": "#introductions"
+    }
+  },
+  "appeals": {
+    "enabled": true,
+    "reviewChannelId": "1409195488791625819",
+    "form": {
+      "title": "Ban Appeal",
+      "fields": [
+        "Why should we lift your ban?",
+        "What happened?",
+        "Anything else we should know?"
+      ]
     }
   }
 }

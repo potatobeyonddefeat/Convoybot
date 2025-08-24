@@ -1,5 +1,6 @@
 const { PermissionFlagsBits, ChannelType } = require('discord.js');
 const { dmUser } = require('../utils/notifier');
+const { createOneTimeInvite } = require('../utils/invite');
 
 const joinBuckets = new Map(); // guildId -> timestamps[]
 
@@ -65,15 +66,28 @@ module.exports = {
 				try {
 					flagged = true;
 					const action = cfg.action || 'ban';
-					if (action === 'ban') await member.ban({ reason: 'Raid prevention: new account' });
-					else if (action === 'kick') await member.kick('Raid prevention: new account');
-					else {
+					if (action === 'ban') {
+						await member.ban({ reason: 'Raid prevention: new account' });
+						dmUser(client, member.id, `You were banned from ${member.guild.name} due to account age checks for raid prevention. You may appeal via /appeal in DMs.`).catch(() => {});
+					} else if (action === 'kick') {
+						await member.kick('Raid prevention: new account');
+						let inviteUrl = '';
+						try {
+							const { url } = await createOneTimeInvite(member.guild, client.config.invites?.preferredChannelId, 'Appeal reinvite (kick)');
+							inviteUrl = url;
+						} catch {}
+						dmUser(client, member.id, `You were kicked from ${member.guild.name} due to account age checks for raid prevention. If you believe this is a mistake, use this 24h one-time invite to rejoin and contact staff: ${inviteUrl || 'Invite unavailable'}`).catch(() => {});
+					} else {
 						const ms = (cfg.timeoutMinutes || 60) * 60 * 1000;
 						await member.timeout(ms, 'Raid prevention: new account');
+						let inviteUrl = '';
+						try {
+							const { url } = await createOneTimeInvite(member.guild, client.config.invites?.preferredChannelId, 'Appeal reinvite (timeout)');
+							inviteUrl = url;
+						} catch {}
+						dmUser(client, member.id, `You were temporarily restricted in ${member.guild.name} due to account age checks. You can use this 24h one-time invite if you get disconnected: ${inviteUrl || 'Invite unavailable'}`).catch(() => {});
 					}
 					client.audit.log({ command: 'raid.account-age', actorId: 'system', actorTag: 'system', target: `${member.user.tag} (${member.id})`, reason: `age ${ageDays.toFixed(2)}d < ${cfg.newAccountAgeDays}d`, action });
-					// DM user to explain
-					dmUser(client, member.id, `You were ${action} from ${member.guild.name} due to account age checks for raid prevention.`).catch(() => {});
 				} catch {}
 			}
 
