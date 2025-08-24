@@ -9,6 +9,7 @@ function getCatalog() {
 			{ name: 'purge', usage: '/purge count channel?', desc: 'Bulk delete 1–100 recent messages.', userPerms: [PermissionFlagsBits.ManageMessages], botPerms: [PermissionFlagsBits.ManageMessages, PermissionFlagsBits.ReadMessageHistory], details: 'Deletes recent messages (cannot delete older than 14 days). Records an audit entry with deleted count.' },
 			{ name: 'slowmode', usage: '/slowmode seconds channel?', desc: 'Set channel slowmode.', userPerms: [PermissionFlagsBits.ManageChannels], botPerms: [PermissionFlagsBits.ManageChannels], details: 'Sets the per-user rate limit for a channel and records an audit entry.' },
 			{ name: 'channel', usage: '/channel lock|unlock channel?', desc: 'Lock or unlock a text channel.', userPerms: [PermissionFlagsBits.ManageChannels], botPerms: [PermissionFlagsBits.ManageChannels], details: 'Toggles Send Messages for @everyone in the channel and records an audit entry.' },
+			{ name: 'role', usage: '/role add|remove user role reason?', desc: 'Give or remove roles from members.', userPerms: [PermissionFlagsBits.ManageRoles], botPerms: [PermissionFlagsBits.ManageRoles], details: 'Respects role hierarchy: your and the bot’s highest roles must be above the target role.' },
 		],
 		admin: [
 			{ name: 'security', usage: '/security ...', desc: 'View and configure security settings.', userPerms: [PermissionFlagsBits.Administrator], botPerms: [], details: 'Use subcommands to enable/disable security, configure anti-spam, bad-words, and raid protection. Settings persist to data/security.json.' },
