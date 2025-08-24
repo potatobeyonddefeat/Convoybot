@@ -1,18 +1,35 @@
+const helpModule = require('../commands/general/help');
+
 module.exports = {
 	name: 'interactionCreate',
 	execute: async (client, interaction) => {
-		if (!interaction.isChatInputCommand()) return;
-		const command = client.commands.get(interaction.commandName);
-		if (!command) return;
 		try {
-			await command.execute(interaction, client);
+			if (interaction.isChatInputCommand()) {
+				const command = client.commands.get(interaction.commandName);
+				if (!command) return;
+				await command.execute(interaction, client);
+				return;
+			}
+
+			if (interaction.isStringSelectMenu() && interaction.customId === 'help:menu') {
+				const value = interaction.values?.[0];
+				let embed;
+				switch (value) {
+					case 'moderation': embed = helpModule.helpHandlers.moderationEmbed(); break;
+					case 'security': embed = helpModule.helpHandlers.securityEmbed(); break;
+					case 'admin': embed = helpModule.helpHandlers.adminEmbed(); break;
+					case 'overview':
+					default: embed = helpModule.helpHandlers.overviewEmbed();
+				}
+				await interaction.update({ embeds: [embed], components: [helpModule.helpHandlers.buildMenu()] });
+				return;
+			}
 		} catch (error) {
-			client.logger.error(`Command execution error in /${interaction.commandName}`, error?.stack || error);
-			const msg = 'There was an error executing this command.';
+			client.logger.error(`Interaction error`, error?.stack || error);
 			if (interaction.deferred || interaction.replied) {
-				await interaction.followUp({ content: msg, ephemeral: true }).catch(() => {});
-			} else {
-				await interaction.reply({ content: msg, ephemeral: true }).catch(() => {});
+				await interaction.followUp({ content: 'There was an error executing this interaction.', ephemeral: true }).catch(() => {});
+			} else if (interaction.isChatInputCommand()) {
+				await interaction.reply({ content: 'There was an error executing this command.', ephemeral: true }).catch(() => {});
 			}
 		}
 	},
