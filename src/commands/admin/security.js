@@ -29,7 +29,14 @@ module.exports = {
 			.addSubcommand((s) => s.setName('massjoin').setDescription('Set mass-join threshold and window')
 				.addIntegerOption((o) => o.setName('threshold').setDescription('Joins in window to trigger').setRequired(true))
 				.addIntegerOption((o) => o.setName('window_ms').setDescription('Window ms').setRequired(true))
-				.addIntegerOption((o) => o.setName('lock_minutes').setDescription('Lockdown minutes').setRequired(true)))),
+				.addIntegerOption((o) => o.setName('lock_minutes').setDescription('Lockdown minutes').setRequired(true)))
+			.addSubcommand((s) => s.setName('action').setDescription('Set action for underage accounts')
+				.addStringOption((o) => o.setName('type').setDescription('timeout|kick|ban').setRequired(true).addChoices(
+					{ name: 'timeout', value: 'timeout' },
+					{ name: 'kick', value: 'kick' },
+					{ name: 'ban', value: 'ban' }
+				)))
+		),
 	execute: async (interaction, client) => {
 		const sec = client.config.security;
 		const sub = interaction.options.getSubcommand(false);
@@ -84,6 +91,11 @@ module.exports = {
 				const lockdownMinutes = interaction.options.getInteger('lock_minutes', true);
 				client.config.security = updateSecurity(sec, { raidMode: { enabled: true, massJoin: { enabled: true, threshold, windowMs, lockdownMinutes } } });
 				return interaction.reply({ ephemeral: true, content: `Raid: mass-join threshold ${threshold} in ${windowMs}ms; lockdown ${lockdownMinutes}m.` });
+			}
+			if (sub === 'action') {
+				const type = interaction.options.getString('type', true);
+				client.config.security = updateSecurity(sec, { raidMode: { enabled: true, action: type } });
+				return interaction.reply({ ephemeral: true, content: `Raid: action set to ${type}.` });
 			}
 		}
 

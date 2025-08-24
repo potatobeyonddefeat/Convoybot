@@ -53,36 +53,40 @@ module.exports = {
 	name: 'guildMemberAdd',
 	once: false,
 	execute: async (client, member) => {
-		// Welcome
-		sendWelcome(client, member);
-
-		// Raid prevention
+		// Raid prevention first
 		const cfg = client.config.security?.raidMode;
-		if (!cfg?.enabled) return;
+		let flagged = false;
+		if (cfg?.enabled) {
+			// Account age check
+			const createdAt = member.user.createdAt;
+			const ageDays = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+			if (cfg.newAccountAgeDays && ageDays < cfg.newAccountAgeDays) {
+				try {
+					flagged = true;
+					if (cfg.action === 'ban') await member.ban({ reason: 'Raid prevention: new account' });
+					else if (cfg.action === 'kick') await member.kick('Raid prevention: new account');
+					else {
+						const ms = (cfg.timeoutMinutes || 60) * 60 * 1000;
+						await member.timeout(ms, 'Raid prevention: new account');
+					}
+					client.audit.log({ command: 'raid.account-age', actorId: 'system', actorTag: 'system', target: `${member.user.tag} (${member.id})` });
+				} catch {}
+			}
 
-		// Account age check
-		const createdAt = member.user.createdAt;
-		const ageDays = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
-		if (cfg.newAccountAgeDays && ageDays < cfg.newAccountAgeDays) {
-			try {
-				if (cfg.action === 'ban') await member.ban({ reason: 'Raid prevention: new account' });
-				else if (cfg.action === 'kick') await member.kick('Raid prevention: new account');
-				else {
-					const ms = (cfg.timeoutMinutes || 60) * 60 * 1000;
-					await member.timeout(ms, 'Raid prevention: new account');
+			// Mass join detection
+			if (cfg.massJoin?.enabled) {
+				const joins = recordJoin(member.guild.id, cfg.massJoin.windowMs || 60000);
+				if (joins >= (cfg.massJoin.threshold || 5)) {
+					applyLockdown(client, member.guild);
+					const endInMs = (cfg.massJoin.lockdownMinutes || 10) * 60 * 1000;
+					setTimeout(() => removeLockdown(client, member.guild), endInMs).unref?.();
 				}
-				client.audit.log({ command: 'raid.account-age', actorId: 'system', actorTag: 'system', target: `${member.user.tag} (${member.id})` });
-			} catch {}
+			}
 		}
 
-		// Mass join detection
-		if (cfg.massJoin?.enabled) {
-			const joins = recordJoin(member.guild.id, cfg.massJoin.windowMs || 60000);
-			if (joins >= (cfg.massJoin.threshold || 5)) {
-				applyLockdown(client, member.guild);
-				const endInMs = (cfg.massJoin.lockdownMinutes || 10) * 60 * 1000;
-				setTimeout(() => removeLockdown(client, member.guild), endInMs).unref?.();
-			}
+		// Welcome only if not flagged by age check
+		if (!flagged) {
+			sendWelcome(client, member);
 		}
 	},
 };

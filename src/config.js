@@ -30,7 +30,7 @@ module.exports = {
 			enabled: false,
 			newAccountAgeDays: 1,
 			restrictNewMembers: true,
-			action: 'timeout', // timeout|kick|ban
+			action: 'ban', // timeout|kick|ban (default: ban)
 			timeoutMinutes: 60,
 			massJoin: {
 				enabled: true,
