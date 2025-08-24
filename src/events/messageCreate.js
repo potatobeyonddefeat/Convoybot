@@ -1,3 +1,4 @@
+const { EmbedBuilder } = require('discord.js');
 const urlRegex = /https?:\/\/[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:\/?#\[\]@!$&'\(\)\*\+,;=.]+/gi;
 
 const recentMessages = new Map(); // userId -> { timestamps: number[] }
@@ -9,6 +10,17 @@ function isAllowedDomain(url, allowList) {
 	} catch {
 		return false;
 	}
+}
+
+function censor(content, words, maskChar) {
+	let out = content;
+	for (const word of words) {
+		if (!word) continue;
+		const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		const re = new RegExp(escaped, 'gi');
+		out = out.replace(re, (m) => maskChar.repeat(Math.max(m.length, 3)));
+	}
+	return out;
 }
 
 module.exports = {
@@ -23,6 +35,7 @@ module.exports = {
 			const mentionsCount = (message.mentions.users.size || 0) + (message.mentions.roles.size || 0) + (message.mentions.everyone ? 1 : 0);
 			if (mentionsCount > (cfg.mentions.maxMentions || 5)) {
 				await message.delete().catch(() => {});
+				client.audit.log({ command: 'filter.mentions', actorId: message.author.id, actorTag: message.author.tag, channel: message.channel?.name, target: `${mentionsCount} mentions` });
 				return message.channel.send({ content: `${message.author}, too many mentions.` }).then((m) => setTimeout(() => m.delete().catch(() => {}), 5000));
 			}
 		}
@@ -32,7 +45,12 @@ module.exports = {
 			const contentLower = message.content.toLowerCase();
 			const matched = cfg.badWords.list.find((w) => contentLower.includes(w.toLowerCase()));
 			if (matched) {
+				client.audit.log({ command: 'filter.badword', actorId: message.author.id, actorTag: message.author.tag, channel: message.channel?.name, target: matched });
 				if (cfg.badWords.delete) await message.delete().catch(() => {});
+				if (cfg.badWords.censor && cfg.badWords.repostCensored) {
+					const censored = censor(message.content, cfg.badWords.list, cfg.badWords.maskChar || '*');
+					message.channel.send({ content: `${message.author}: ${censored}` }).catch(() => {});
+				}
 				if (cfg.badWords.warn) {
 					message.channel.send({ content: `${message.author}, watch your language.` }).then((m) => setTimeout(() => m.delete().catch(() => {}), 5000));
 				}
@@ -48,6 +66,7 @@ module.exports = {
 			const inviteBlocked = cfg.links.blockInvites && /(discord\.gg|discord\.com\/invite)/i.test(message.content);
 			if (blocked || inviteBlocked) {
 				await message.delete().catch(() => {});
+				client.audit.log({ command: 'filter.links', actorId: message.author.id, actorTag: message.author.tag, channel: message.channel?.name, target: 'link removed' });
 				return message.channel.send({ content: `${message.author}, links are not allowed here.` }).then((m) => setTimeout(() => m.delete().catch(() => {}), 5000));
 			}
 		}
@@ -65,6 +84,7 @@ module.exports = {
 
 			if (data.timestamps.length > max) {
 				await message.member?.timeout((cfg.antiSpam.timeoutSeconds || 300) * 1000, 'Anti-spam');
+				client.audit.log({ command: 'filter.spam', actorId: message.author.id, actorTag: message.author.tag, channel: message.channel?.name, target: `${data.timestamps.length} msgs/${windowMs}ms` });
 				await message.channel.send({ content: `${message.author}, you are sending messages too quickly.` }).then((m) => setTimeout(() => m.delete().catch(() => {}), 5000));
 			}
 		}

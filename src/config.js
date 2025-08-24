@@ -13,6 +13,9 @@ module.exports = {
 			list: ['badword1', 'badword2'],
 			delete: true,
 			warn: true,
+			censor: true,
+			maskChar: '*',
+			repostCensored: true,
 		},
 		links: {
 			enabled: true,
@@ -27,13 +30,21 @@ module.exports = {
 			enabled: false,
 			newAccountAgeDays: 1,
 			restrictNewMembers: true,
+			action: 'timeout', // timeout|kick|ban
+			timeoutMinutes: 60,
+			massJoin: {
+				enabled: true,
+				threshold: 5,
+				windowMs: 60000,
+				lockdownMinutes: 10,
+				lockChannels: ['general'],
+			},
 		},
 	},
 	logging: { level: 'info' },
 	audit: {
 		enabled: true,
 		channelId: process.env.AUDIT_CHANNEL_ID || null,
-		// Fallback to file logging if no channel
 		fileEnabled: true,
 		filePath: 'logs/audit.log',
 	},

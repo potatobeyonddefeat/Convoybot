@@ -1,0 +1,7 @@
+{"ts":"2025-08-24 03:59:43.857","command":"channel.lock","actorId":"1249576473740841058","actorTag":"iloveoctober._","channel":"general"}
+{"ts":"2025-08-24 03:59:55.570","command":"channel.unlock","actorId":"1249576473740841058","actorTag":"iloveoctober._","channel":"general"}
+{"ts":"2025-08-24 04:00:08.562","command":"kick","actorId":"1249576473740841058","actorTag":"iloveoctober._","target":"unknown_mercs_ (780999097682493441)","reason":"ur gay","channel":"general"}
+{"ts":"2025-08-24 04:01:01.914","command":"channel.lock","actorId":"1249576473740841058","actorTag":"iloveoctober._","channel":"audit-logs"}
+{"ts":"2025-08-24 04:02:27.420","command":"ban","actorId":"1249576473740841058","actorTag":"iloveoctober._","target":"playguyfartman (1259330705897422922)","reason":"black","channel":"audit-logs"}
+{"ts":"2025-08-24 04:02:47.469","command":"timeout","actorId":"1249576473740841058","actorTag":"iloveoctober._","target":"unknown_mercs_ (780999097682493441)","reason":"test123","channel":"audit-logs","durationMinutes":1}
+{"ts":"2025-08-24 04:04:16.623","command":"purge","actorId":"1249576473740841058","actorTag":"iloveoctober._","channel":"general","deletedCount":4}
