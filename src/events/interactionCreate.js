@@ -7,11 +7,12 @@ module.exports = {
 		try {
 			await command.execute(interaction, client);
 		} catch (error) {
-			client.logger.error('Command execution error', error);
+			client.logger.error(`Command execution error in /${interaction.commandName}`, error?.stack || error);
+			const msg = 'There was an error executing this command.';
 			if (interaction.deferred || interaction.replied) {
-				await interaction.followUp({ content: 'There was an error executing this command.', ephemeral: true });
+				await interaction.followUp({ content: msg, ephemeral: true }).catch(() => {});
 			} else {
-				await interaction.reply({ content: 'There was an error executing this command.', ephemeral: true });
+				await interaction.reply({ content: msg, ephemeral: true }).catch(() => {});
 			}
 		}
 	},
