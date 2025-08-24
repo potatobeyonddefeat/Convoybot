@@ -12,16 +12,22 @@ module.exports = {
 			}
 
 			if (interaction.isStringSelectMenu() && interaction.customId === 'help:menu') {
-				const value = interaction.values?.[0];
-				let embed;
-				switch (value) {
-					case 'moderation': embed = helpModule.helpHandlers.moderationEmbed(); break;
-					case 'security': embed = helpModule.helpHandlers.securityEmbed(); break;
-					case 'admin': embed = helpModule.helpHandlers.adminEmbed(); break;
-					case 'overview':
-					default: embed = helpModule.helpHandlers.overviewEmbed();
+				const access = helpModule.helpHandlers.filterByAccess(interaction);
+				const value = interaction.values?.[0] || 'overview';
+				const embed = helpModule.helpHandlers.embedFor(value, access);
+				const second = helpModule.helpHandlers.buildCommandMenu(value, access);
+				const components = [helpModule.helpHandlers.buildMenu(access)];
+				if (second) components.push(second);
+				await interaction.update({ embeds: [embed], components });
+				return;
+			}
+
+			if (interaction.isStringSelectMenu() && interaction.customId === 'help:detail') {
+				const key = interaction.values?.[0];
+				const embed = helpModule.helpHandlers.detailEmbed(key, interaction);
+				if (embed) {
+					await interaction.update({ embeds: [embed], components: interaction.message.components });
 				}
-				await interaction.update({ embeds: [embed], components: [helpModule.helpHandlers.buildMenu()] });
 				return;
 			}
 		} catch (error) {
