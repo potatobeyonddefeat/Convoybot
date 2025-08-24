@@ -1,4 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
+const { notifyFilter } = require('../utils/notifier');
 const urlRegex = /https?:\/\/[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:\/?#\[\]@!$&'\(\)\*\+,;=.]+/gi;
 
 const recentMessages = new Map(); // userId -> { timestamps: number[] }
@@ -36,6 +37,7 @@ module.exports = {
 			if (mentionsCount > (cfg.mentions.maxMentions || 5)) {
 				await message.delete().catch(() => {});
 				client.audit.log({ command: 'filter.mentions', actorId: message.author.id, actorTag: message.author.tag, channel: message.channel?.name, target: `${mentionsCount} mentions` });
+				notifyFilter(client, message.author.id, `Your message in #${message.channel?.name} was removed for too many mentions.`).catch(() => {});
 				return message.channel.send({ content: `${message.author}, too many mentions.` }).then((m) => setTimeout(() => m.delete().catch(() => {}), 5000));
 			}
 		}
@@ -47,6 +49,7 @@ module.exports = {
 			if (matched) {
 				client.audit.log({ command: 'filter.badword', actorId: message.author.id, actorTag: message.author.tag, channel: message.channel?.name, target: matched });
 				if (cfg.badWords.delete) await message.delete().catch(() => {});
+				notifyFilter(client, message.author.id, `Your message in #${message.channel?.name} contained prohibited language and was removed.`).catch(() => {});
 				if (cfg.badWords.censor && cfg.badWords.repostCensored) {
 					const censored = censor(message.content, cfg.badWords.list, cfg.badWords.maskChar || '*');
 					message.channel.send({ content: `${message.author}: ${censored}` }).catch(() => {});
@@ -67,6 +70,7 @@ module.exports = {
 			if (blocked || inviteBlocked) {
 				await message.delete().catch(() => {});
 				client.audit.log({ command: 'filter.links', actorId: message.author.id, actorTag: message.author.tag, channel: message.channel?.name, target: 'link removed' });
+				notifyFilter(client, message.author.id, `Your message in #${message.channel?.name} included a disallowed link and was removed.`).catch(() => {});
 				return message.channel.send({ content: `${message.author}, links are not allowed here.` }).then((m) => setTimeout(() => m.delete().catch(() => {}), 5000));
 			}
 		}
@@ -85,6 +89,7 @@ module.exports = {
 			if (data.timestamps.length > max) {
 				await message.member?.timeout((cfg.antiSpam.timeoutSeconds || 300) * 1000, 'Anti-spam');
 				client.audit.log({ command: 'filter.spam', actorId: message.author.id, actorTag: message.author.tag, channel: message.channel?.name, target: `${data.timestamps.length} msgs/${windowMs}ms` });
+				notifyFilter(client, message.author.id, `You were rate-limited for sending messages too quickly in #${message.channel?.name}.`).catch(() => {});
 				await message.channel.send({ content: `${message.author}, you are sending messages too quickly.` }).then((m) => setTimeout(() => m.delete().catch(() => {}), 5000));
 			}
 		}

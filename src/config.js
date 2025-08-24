@@ -48,4 +48,10 @@ module.exports = {
 		fileEnabled: true,
 		filePath: 'logs/audit.log',
 	},
+	notifier: {
+		adminUserId: process.env.ADMIN_USER_ID || '1249576473740841058',
+		dmOnModeration: true,
+		dmOnFilter: true,
+		adminNotifyOnError: true,
+	},
 };

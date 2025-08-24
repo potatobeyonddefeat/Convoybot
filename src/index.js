@@ -8,6 +8,7 @@ const { loadEvents } = require('./handlers/eventLoader');
 const { createLogger } = require('./utils/logger');
 const { createAudit } = require('./utils/audit');
 const { loadSecurity } = require('./utils/configStore');
+const { notifyAdminError } = require('./utils/notifier');
 
 const logger = createLogger(config.logging?.level || 'info');
 
@@ -29,6 +30,15 @@ client.config.security = loadSecurity(client.config.security);
 client.logger = logger;
 client.audit = createAudit(client);
 
+process.on('unhandledRejection', (err) => {
+	logger.error('UnhandledRejection', err);
+	notifyAdminError(client, err);
+});
+process.on('uncaughtException', (err) => {
+	logger.error('UncaughtException', err);
+	notifyAdminError(client, err);
+});
+
 (async () => {
 	try {
 		await loadCommands(client);
@@ -44,6 +54,7 @@ client.audit = createAudit(client);
 		logger.info('Convoy bot logging in...');
 	} catch (error) {
 		logger.error('Failed to start Convoy bot', error);
+		await notifyAdminError(client, error);
 		process.exit(1);
 	}
 })();

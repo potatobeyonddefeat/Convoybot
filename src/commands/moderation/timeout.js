@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { ensureBotGuildPermissions, isRoleHierarchyHigher } = require('../../utils/permissions');
+const { notifyModeration } = require('../../utils/notifier');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -26,6 +27,7 @@ module.exports = {
 		try {
 			const ms = minutes * 60 * 1000;
 			await targetMember.timeout(ms, reason);
+			notifyModeration(interaction.client, targetUser.id, `You have been timed out in ${interaction.guild.name} for ${minutes} minutes. Reason: ${reason}`).catch(() => {});
 
 			interaction.client.audit.log({
 				command: 'timeout',

@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { ensureBotGuildPermissions, isRoleHierarchyHigher } = require('../../utils/permissions');
+const { notifyModeration } = require('../../utils/notifier');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -24,7 +25,7 @@ module.exports = {
 		await interaction.deferReply({ ephemeral: true });
 		try {
 			// Non-blocking DM
-			targetUser.send(`You have been kicked from ${interaction.guild.name}: ${reason}`).catch(() => {});
+			notifyModeration(interaction.client, targetUser.id, `You have been kicked from ${interaction.guild.name}. Reason: ${reason}`).catch(() => {});
 			await targetMember.kick(reason);
 
 			interaction.client.audit.log({

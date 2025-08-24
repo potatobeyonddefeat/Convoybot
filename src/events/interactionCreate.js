@@ -1,4 +1,5 @@
 const helpModule = require('../commands/general/help');
+const { notifyAdminError } = require('../utils/notifier');
 
 module.exports = {
 	name: 'interactionCreate',
@@ -32,6 +33,7 @@ module.exports = {
 			}
 		} catch (error) {
 			client.logger.error(`Interaction error`, error?.stack || error);
+			notifyAdminError(client, error);
 			if (interaction.deferred || interaction.replied) {
 				await interaction.followUp({ content: 'There was an error executing this interaction.', ephemeral: true }).catch(() => {});
 			} else if (interaction.isChatInputCommand()) {

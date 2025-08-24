@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { ensureBotGuildPermissions, isRoleHierarchyHigher } = require('../../utils/permissions');
+const { notifyModeration } = require('../../utils/notifier');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -23,8 +24,8 @@ module.exports = {
 
 		await interaction.deferReply({ ephemeral: true });
 		try {
-			// Fire-and-forget DM so it doesn't delay the ban
-			targetUser.send(`You have been banned from ${interaction.guild.name}: ${reason}`).catch(() => {});
+			// Fire-and-forget DM via notifier
+			notifyModeration(interaction.client, targetUser.id, `You have been banned from ${interaction.guild.name}. Reason: ${reason}`).catch(() => {});
 			await targetMember.ban({ reason });
 
 			interaction.client.audit.log({
