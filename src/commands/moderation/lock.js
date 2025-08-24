@@ -12,6 +12,14 @@ async function setLock(interaction, shouldLock) {
 	try {
 		const everyone = interaction.guild.roles.everyone;
 		await channel.permissionOverwrites.edit(everyone, { SendMessages: shouldLock ? false : null }, { reason: shouldLock ? 'Channel locked via command' : 'Channel unlocked via command' });
+
+		interaction.client.audit.log({
+			command: shouldLock ? 'channel.lock' : 'channel.unlock',
+			actorId: interaction.user.id,
+			actorTag: interaction.user.tag,
+			channel: channel?.name,
+		}).catch?.(() => {});
+
 		await interaction.editReply(`${shouldLock ? 'Locked' : 'Unlocked'} ${channel}.`);
 	} catch (err) {
 		interaction.client?.logger?.error?.('Failed to update channel lock', err);

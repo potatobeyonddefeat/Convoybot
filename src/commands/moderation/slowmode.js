@@ -15,6 +15,13 @@ module.exports = {
 		await interaction.deferReply({ ephemeral: true });
 		try {
 			await channel.setRateLimitPerUser(seconds, 'Set by slowmode command');
+			interaction.client.audit.log({
+				command: 'slowmode',
+				actorId: interaction.user.id,
+				actorTag: interaction.user.tag,
+				channel: channel?.name,
+				seconds,
+			}).catch?.(() => {});
 			await interaction.editReply(`Set slowmode in ${channel} to ${seconds}s.`);
 		} catch (err) {
 			await interaction.editReply('Failed to set slowmode.');

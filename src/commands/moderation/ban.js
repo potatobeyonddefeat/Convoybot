@@ -23,8 +23,19 @@ module.exports = {
 
 		await interaction.deferReply({ ephemeral: true });
 		try {
-			await targetUser.send(`You have been banned from ${interaction.guild.name}: ${reason}`).catch(() => {});
+			// Fire-and-forget DM so it doesn't delay the ban
+			targetUser.send(`You have been banned from ${interaction.guild.name}: ${reason}`).catch(() => {});
 			await targetMember.ban({ reason });
+
+			interaction.client.audit.log({
+				command: 'ban',
+				actorId: interaction.user.id,
+				actorTag: interaction.user.tag,
+				target: `${targetUser.tag} (${targetUser.id})`,
+				reason,
+				channel: interaction.channel?.name,
+			}).catch?.(() => {});
+
 			await interaction.editReply(`Banned ${targetUser.tag} | Reason: ${reason}`);
 		} catch (err) {
 			await interaction.editReply('Failed to ban the user.');

@@ -20,6 +20,14 @@ module.exports = {
 		await interaction.deferReply({ ephemeral: true });
 		try {
 			const deleted = await channel.bulkDelete(count, true);
+			interaction.client.audit.log({
+				command: 'purge',
+				actorId: interaction.user.id,
+				actorTag: interaction.user.tag,
+				channel: channel?.name,
+				deletedCount: deleted.size,
+			}).catch?.(() => {});
+
 			if (deleted.size === 0) {
 				await interaction.editReply('No messages were deleted. Messages older than 14 days cannot be deleted.');
 			} else {

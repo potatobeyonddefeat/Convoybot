@@ -30,4 +30,11 @@ module.exports = {
 		},
 	},
 	logging: { level: 'info' },
+	audit: {
+		enabled: true,
+		channelId: process.env.AUDIT_CHANNEL_ID || null,
+		// Fallback to file logging if no channel
+		fileEnabled: true,
+		filePath: 'logs/audit.log',
+	},
 };
