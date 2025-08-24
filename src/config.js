@@ -41,6 +41,15 @@ module.exports = {
 			},
 		},
 	},
+	welcome: {
+		enabled: true,
+		channelId: null,
+		template: 'Welcome {user} to {server}! Check out {rules} and introduce yourself in {introductions}.',
+		placeholders: {
+			rules: '#rules',
+			introductions: '#introductions',
+		},
+	},
 	logging: { level: 'info' },
 	audit: {
 		enabled: true,

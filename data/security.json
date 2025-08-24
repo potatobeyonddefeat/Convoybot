@@ -10,7 +10,8 @@
     "enabled": true,
     "list": [
       "badword1",
-      "badword2"
+      "badword2",
+      "nigger"
     ],
     "delete": true,
     "warn": true,

@@ -22,20 +22,30 @@ function deepMerge(base, override) {
 	return out;
 }
 
-function loadSecurity(defaults) {
+function readAll() {
 	try {
 		ensureStore();
 		const raw = fs.readFileSync(STORE_PATH, 'utf8');
-		const saved = JSON.parse(raw || '{}');
-		return deepMerge(defaults, saved || {});
+		return JSON.parse(raw || '{}');
 	} catch {
-		return { ...defaults };
+		return {};
 	}
 }
 
-function saveSecurity(security) {
+function writeAll(obj) {
 	ensureStore();
-	fs.writeFileSync(STORE_PATH, JSON.stringify(security, null, 2));
+	fs.writeFileSync(STORE_PATH, JSON.stringify(obj, null, 2));
+}
+
+function loadSecurity(defaults) {
+	const all = readAll();
+	return deepMerge(defaults, all.security || {});
+}
+
+function saveSecurity(security) {
+	const all = readAll();
+	all.security = security;
+	writeAll(all);
 }
 
 function updateSecurity(current, partial) {
@@ -44,4 +54,21 @@ function updateSecurity(current, partial) {
 	return updated;
 }
 
-module.exports = { loadSecurity, saveSecurity, updateSecurity, deepMerge };
+function loadWelcome(defaults) {
+	const all = readAll();
+	return deepMerge(defaults, all.welcome || {});
+}
+
+function saveWelcome(welcome) {
+	const all = readAll();
+	all.welcome = welcome;
+	writeAll(all);
+}
+
+function updateWelcome(current, partial) {
+	const updated = deepMerge(current, partial);
+	saveWelcome(updated);
+	return updated;
+}
+
+module.exports = { loadSecurity, saveSecurity, updateSecurity, deepMerge, loadWelcome, saveWelcome, updateWelcome };

@@ -39,10 +39,24 @@ async function removeLockdown(client, guild) {
 	}
 }
 
+async function sendWelcome(client, member) {
+	const w = client.config.welcome;
+	if (!w?.enabled || !w.channelId) return;
+	const channel = member.guild.channels.cache.get(w.channelId) || await member.guild.channels.fetch(w.channelId).catch(() => null);
+	if (!channel || channel.type !== ChannelType.GuildText) return;
+	const { render } = require('../utils/template');
+	const text = render(w.template, { user: `<@${member.id}>`, server: member.guild.name, ...(w.placeholders || {}) });
+	await channel.send({ content: text }).catch(() => {});
+}
+
 module.exports = {
 	name: 'guildMemberAdd',
 	once: false,
 	execute: async (client, member) => {
+		// Welcome
+		sendWelcome(client, member);
+
+		// Raid prevention
 		const cfg = client.config.security?.raidMode;
 		if (!cfg?.enabled) return;
 

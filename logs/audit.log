@@ -6,3 +6,4 @@
 {"ts":"2025-08-24 04:02:47.469","command":"timeout","actorId":"1249576473740841058","actorTag":"iloveoctober._","target":"unknown_mercs_ (780999097682493441)","reason":"test123","channel":"audit-logs","durationMinutes":1}
 {"ts":"2025-08-24 04:04:16.623","command":"purge","actorId":"1249576473740841058","actorTag":"iloveoctober._","channel":"general","deletedCount":4}
 {"ts":"2025-08-24 04:12:56.590","command":"purge","actorId":"1249576473740841058","actorTag":"iloveoctober._","channel":"general","deletedCount":10}
+{"ts":"2025-08-24 09:52:03.778","command":"filter.badword","actorId":"1249576473740841058","actorTag":"iloveoctober._","channel":"general","target":"nigger"}
