@@ -12,3 +12,5 @@
 {"ts":"2025-08-24 10:18:14.785","command":"raid.account-age","actorId":"system","actorTag":"system","target":"sw3den1_77191 (1393037821706764480)","reason":"age 44.59d < 100d","action":"kick"}
 {"ts":"2025-08-24 10:19:24.125","command":"ban","actorId":"1249576473740841058","actorTag":"iloveoctober._","target":"sw3den1_77191 (1393037821706764480)","reason":"Test for appeals","channel":"general"}
 {"ts":"2025-08-24 10:22:06.612","command":"appeal.approve","actorId":"1249576473740841058","actorTag":"iloveoctober._","target":"sw3den1_77191"}
+{"ts":"2025-08-24 10:29:09.145","command":"ban","actorId":"1249576473740841058","actorTag":"iloveoctober._","target":"sw3den1_77191 (1393037821706764480)","reason":"No reason provided","channel":"general"}
+{"ts":"2025-08-24 10:29:37.174","command":"appeal.approve","actorId":"1249576473740841058","actorTag":"iloveoctober._","target":"sw3den1_77191"}
