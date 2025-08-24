@@ -71,4 +71,21 @@ function updateWelcome(current, partial) {
 	return updated;
 }
 
-module.exports = { loadSecurity, saveSecurity, updateSecurity, deepMerge, loadWelcome, saveWelcome, updateWelcome };
+function loadAppeals(defaults) {
+	const all = readAll();
+	return deepMerge(defaults, all.appeals || {});
+}
+
+function saveAppeals(appeals) {
+	const all = readAll();
+	all.appeals = appeals;
+	writeAll(all);
+}
+
+function updateAppeals(current, partial) {
+	const updated = deepMerge(current, partial);
+	saveAppeals(updated);
+	return updated;
+}
+
+module.exports = { loadSecurity, saveSecurity, updateSecurity, deepMerge, loadWelcome, saveWelcome, updateWelcome, loadAppeals, saveAppeals, updateAppeals };

@@ -7,7 +7,7 @@ const { loadCommands } = require('./handlers/commandLoader');
 const { loadEvents } = require('./handlers/eventLoader');
 const { createLogger } = require('./utils/logger');
 const { createAudit } = require('./utils/audit');
-const { loadSecurity, loadWelcome } = require('./utils/configStore');
+const { loadSecurity, loadWelcome, loadAppeals } = require('./utils/configStore');
 const { notifyAdminError } = require('./utils/notifier');
 
 const logger = createLogger(config.logging?.level || 'info');
@@ -28,6 +28,7 @@ client.commands = new Collection();
 client.config = config;
 client.config.security = loadSecurity(client.config.security);
 client.config.welcome = loadWelcome(client.config.welcome);
+client.config.appeals = loadAppeals(client.config.appeals);
 client.logger = logger;
 client.audit = createAudit(client);
 

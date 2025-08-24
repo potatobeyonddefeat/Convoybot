@@ -1,4 +1,5 @@
 const { PermissionFlagsBits, ChannelType } = require('discord.js');
+const { dmUser } = require('../utils/notifier');
 
 const joinBuckets = new Map(); // guildId -> timestamps[]
 
@@ -63,13 +64,16 @@ module.exports = {
 			if (cfg.newAccountAgeDays && ageDays < cfg.newAccountAgeDays) {
 				try {
 					flagged = true;
-					if (cfg.action === 'ban') await member.ban({ reason: 'Raid prevention: new account' });
-					else if (cfg.action === 'kick') await member.kick('Raid prevention: new account');
+					const action = cfg.action || 'ban';
+					if (action === 'ban') await member.ban({ reason: 'Raid prevention: new account' });
+					else if (action === 'kick') await member.kick('Raid prevention: new account');
 					else {
 						const ms = (cfg.timeoutMinutes || 60) * 60 * 1000;
 						await member.timeout(ms, 'Raid prevention: new account');
 					}
-					client.audit.log({ command: 'raid.account-age', actorId: 'system', actorTag: 'system', target: `${member.user.tag} (${member.id})` });
+					client.audit.log({ command: 'raid.account-age', actorId: 'system', actorTag: 'system', target: `${member.user.tag} (${member.id})`, reason: `age ${ageDays.toFixed(2)}d < ${cfg.newAccountAgeDays}d`, action });
+					// DM user to explain
+					dmUser(client, member.id, `You were ${action} from ${member.guild.name} due to account age checks for raid prevention.`).catch(() => {});
 				} catch {}
 			}
 

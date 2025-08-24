@@ -50,6 +50,14 @@ module.exports = {
 			introductions: '#introductions',
 		},
 	},
+	appeals: {
+		enabled: true,
+		reviewChannelId: null,
+		form: {
+			title: 'Ban Appeal',
+			fields: ['Why should we lift your ban?', 'What happened?', 'Anything else we should know?'],
+		},
+	},
 	logging: { level: 'info' },
 	audit: {
 		enabled: true,

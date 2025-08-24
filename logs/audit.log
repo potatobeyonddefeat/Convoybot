@@ -7,3 +7,5 @@
 {"ts":"2025-08-24 04:04:16.623","command":"purge","actorId":"1249576473740841058","actorTag":"iloveoctober._","channel":"general","deletedCount":4}
 {"ts":"2025-08-24 04:12:56.590","command":"purge","actorId":"1249576473740841058","actorTag":"iloveoctober._","channel":"general","deletedCount":10}
 {"ts":"2025-08-24 09:52:03.778","command":"filter.badword","actorId":"1249576473740841058","actorTag":"iloveoctober._","channel":"general","target":"nigger"}
+{"ts":"2025-08-24 10:10:10.683","command":"channel.lock","actorId":"1249576473740841058","actorTag":"iloveoctober._","channel":"welcome-and-rules"}
+{"ts":"2025-08-24 10:11:01.789","command":"raid.account-age","actorId":"system","actorTag":"system","target":"sw3den1_77191 (1393037821706764480)"}

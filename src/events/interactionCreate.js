@@ -1,5 +1,6 @@
 const helpModule = require('../commands/general/help');
 const { notifyAdminError } = require('../utils/notifier');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
 
 module.exports = {
 	name: 'interactionCreate',
@@ -28,6 +29,70 @@ module.exports = {
 				const embed = helpModule.helpHandlers.detailEmbed(key, interaction);
 				if (embed) {
 					await interaction.update({ embeds: [embed], components: interaction.message.components });
+				}
+				return;
+			}
+
+			// Appeal modal submission
+			if (interaction.isModalSubmit() && interaction.customId === 'appeal:modal') {
+				const guilds = client.guilds.cache;
+				const conf = client.config.appeals;
+				if (!conf?.enabled || !conf.reviewChannelId) return interaction.reply({ ephemeral: true, content: 'Appeals are not available right now.' });
+
+				const responses = [];
+				for (let i = 0; i < 3; i++) {
+					const v = interaction.fields.getTextInputValue(`appeal:field${i}`) || '';
+					if (v) responses.push(v);
+				}
+
+				const embed = new EmbedBuilder()
+					.setTitle('Ban Appeal')
+					.addFields(
+						{ name: 'User', value: `${interaction.user.tag} (${interaction.user.id})` },
+						{ name: 'Responses', value: responses.map((r, idx) => `Q${idx + 1}: ${r}`).join('\n\n').slice(0, 3900) || 'No response' },
+					)
+					.setTimestamp(Date.now())
+					.setColor(0x5865F2);
+
+				const buttons = new ActionRowBuilder().addComponents(
+					new ButtonBuilder().setCustomId(`appeal:approve:${interaction.user.id}`).setLabel('Approve (Unban)').setStyle(ButtonStyle.Success),
+					new ButtonBuilder().setCustomId(`appeal:deny:${interaction.user.id}`).setLabel('Deny').setStyle(ButtonStyle.Danger)
+				);
+
+				// Send to every guild that has the review channel id (in case of multiple guilds sharing config)
+				let sent = false;
+				for (const [, guild] of guilds) {
+					const ch = guild.channels.cache.get(conf.reviewChannelId) || await guild.channels.fetch(conf.reviewChannelId).catch(() => null);
+					if (ch && ch.send) {
+						await ch.send({ embeds: [embed], components: [buttons] }).catch(() => {});
+						sent = true;
+					}
+				}
+				await interaction.reply({ ephemeral: true, content: sent ? 'Your appeal has been submitted.' : 'Could not submit appeal. Please try again later.' });
+				return;
+			}
+
+			// Admin review buttons
+			if (interaction.isButton() && interaction.customId.startsWith('appeal:')) {
+				const [_, action, userId] = interaction.customId.split(':');
+				if (!interaction.memberPermissions?.has('BanMembers')) {
+					return interaction.reply({ ephemeral: true, content: 'You need Ban Members to process appeals.' });
+				}
+				try {
+					const user = await interaction.client.users.fetch(userId).catch(() => null);
+					if (action === 'approve') {
+						await interaction.guild.bans.remove(userId, 'Appeal approved');
+						await interaction.update({ content: `Appeal approved by ${interaction.user.tag}. User unbanned.`, components: [], embeds: interaction.message.embeds });
+						if (user) user.send(`Your appeal was approved in ${interaction.guild.name}. You have been unbanned.`).catch(() => {});
+						interaction.client.audit.log({ command: 'appeal.approve', actorId: interaction.user.id, actorTag: interaction.user.tag, target: `${user?.tag || userId}` });
+					} else if (action === 'deny') {
+						await interaction.update({ content: `Appeal denied by ${interaction.user.tag}.`, components: [], embeds: interaction.message.embeds });
+						if (user) user.send(`Your appeal was denied in ${interaction.guild.name}.`).catch(() => {});
+						interaction.client.audit.log({ command: 'appeal.deny', actorId: interaction.user.id, actorTag: interaction.user.tag, target: `${user?.tag || userId}` });
+					}
+				} catch (e) {
+					interaction.client.logger.error('Appeal handling failed', e);
+					return interaction.reply({ ephemeral: true, content: 'Failed to process appeal.' });
 				}
 				return;
 			}

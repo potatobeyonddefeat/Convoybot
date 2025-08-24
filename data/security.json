@@ -85,9 +85,9 @@
     },
     "raidMode": {
       "enabled": true,
-      "newAccountAgeDays": 20,
+      "newAccountAgeDays": 100,
       "restrictNewMembers": true,
-      "action": "timeout",
+      "action": "kick",
       "timeoutMinutes": 60,
       "massJoin": {
         "enabled": true,
