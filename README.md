@@ -3,9 +3,15 @@
 A social-navigation moderation and security bot for the Convoy Discord server. Built with Node.js and discord.js v14.
 
 ### Features
-- **Moderation**: `/ban`, `/kick`, `/timeout`, `/purge`, `/slowmode`, `channel lock|unlock`
-- **Security**: Anti-spam, bad-words filter, link restrictions, mention limits
-- **Presence**: Shows "Convoys and Cruises"
+- **Moderation**: ban, kick, timeout, purge, slowmode, and channel lock/unlock.
+- **Security filters**: anti-spam, bad-words with censoring, link whitelist/invite blocking, mention limits.
+- **Raid defense**: account-age checks (configurable ban/kick/timeout) and mass-join lockdown.
+- **Audit and notices**: logs actions, DMs moderated users, and alerts admins on errors.
+- **Appeals**: users DM /appeal; staff review with approve/deny buttons (auto-unban + fresh 24h invite on approve).
+- **Welcome**: customizable join message with placeholders.
+- **Help**: interactive /help showing commands and required permissions.
+- **Invites**: generates new single-use, 24h invites for rejoin scenarios.
+
 
 ### Requirements
 - Node.js 18+
