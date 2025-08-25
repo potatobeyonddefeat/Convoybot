@@ -10,6 +10,7 @@ function getCounts(guild) {
 
 async function ensureCategoryAndChannels(guild, config) {
 	const ids = { ...config.ids };
+	const show = { total: true, members: true, bots: true, ...(config.show || {}) };
 	// Category
 	let category = ids.categoryId ? guild.channels.cache.get(ids.categoryId) : null;
 	if (!category || category.type !== ChannelType.GuildCategory) {
@@ -17,22 +18,23 @@ async function ensureCategoryAndChannels(guild, config) {
 		ids.categoryId = category?.id || null;
 	}
 	if (!category) return { ids, category: null };
-	// Permission: hide for everyone (optional), but ensure no one can connect
 	try {
 		await category.permissionOverwrites.edit(guild.roles.everyone, { Connect: false, SendMessages: false });
 	} catch {}
 
-	async function ensureChild(id, name) {
+	async function ensureChild(id, name, visible) {
 		let ch = id ? guild.channels.cache.get(id) : null;
+		if (!visible) {
+			if (ch) { try { await ch.delete('Member count hidden'); } catch {} }
+			return null;
+		}
 		if (!ch || ch.type !== ChannelType.GuildVoice) {
 			ch = await guild.channels.create({ name, type: ChannelType.GuildVoice, parent: category.id, reason: 'Member count channel' }).catch(() => null);
 		} else {
 			try { await ch.setParent(category.id).catch(() => {}); } catch {}
 		}
 		if (ch) {
-			try {
-				await ch.permissionOverwrites.edit(guild.roles.everyone, { Connect: false, SendMessages: false });
-			} catch {}
+			try { await ch.permissionOverwrites.edit(guild.roles.everyone, { Connect: false, SendMessages: false }); } catch {}
 		}
 		return ch;
 	}
@@ -42,34 +44,39 @@ async function ensureCategoryAndChannels(guild, config) {
 	const membersName = render(config.format.members, counts);
 	const botsName = render(config.format.bots, counts);
 
-	const totalCh = await ensureChild(ids.totalId, totalName);
-	const membersCh = await ensureChild(ids.membersId, membersName);
-	const botsCh = await ensureChild(ids.botsId, botsName);
+	const totalCh = await ensureChild(ids.totalId, totalName, !!show.total);
+	const membersCh = await ensureChild(ids.membersId, membersName, !!show.members);
+	const botsCh = await ensureChild(ids.botsId, botsName, !!show.bots);
 
-	ids.totalId = totalCh?.id || ids.totalId;
-	ids.membersId = membersCh?.id || ids.membersId;
-	ids.botsId = botsCh?.id || ids.botsId;
+	ids.totalId = totalCh?.id || (show.total ? ids.totalId : null);
+	ids.membersId = membersCh?.id || (show.members ? ids.membersId : null);
+	ids.botsId = botsCh?.id || (show.bots ? ids.botsId : null);
 
 	return { ids, category };
 }
 
 async function updateNames(guild, config) {
+	const show = { total: true, members: true, bots: true, ...(config.show || {}) };
 	const counts = getCounts(guild);
 	const names = {
 		total: render(config.format.total, counts),
 		members: render(config.format.members, counts),
 		bots: render(config.format.bots, counts),
 	};
-	async function setName(id, name) {
+	async function setName(id, name, visible) {
 		const ch = id ? guild.channels.cache.get(id) || await guild.channels.fetch(id).catch(() => null) : null;
+		if (!visible) {
+			if (ch) { try { await ch.delete('Member count hidden'); } catch {} }
+			return;
+		}
 		if (ch && ch.editable && ch.name !== name) {
 			await ch.setName(name).catch(() => {});
 		}
 	}
 	await Promise.all([
-		setName(config.ids.totalId, names.total),
-		setName(config.ids.membersId, names.members),
-		setName(config.ids.botsId, names.bots),
+		setName(config.ids.totalId, names.total, !!show.total),
+		setName(config.ids.membersId, names.members, !!show.members),
+		setName(config.ids.botsId, names.bots, !!show.bots),
 	]);
 }
 

@@ -69,6 +69,7 @@ module.exports = {
 			members: 'Members: {members}',
 			bots: 'Bots: {bots}',
 		},
+		show: { total: true, members: true, bots: true },
 		ids: { categoryId: null, totalId: null, membersId: null, botsId: null },
 	},
 	logging: { level: 'info' },

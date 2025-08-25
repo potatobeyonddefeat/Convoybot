@@ -120,5 +120,25 @@
         "Anything else we should know?"
       ]
     }
+  },
+  "memberCount": {
+    "enabled": true,
+    "categoryName": "📊 Server Stats",
+    "format": {
+      "total": "All members: {total}",
+      "members": "0",
+      "bots": "Bots: {bots}"
+    },
+    "show": {
+      "total": false,
+      "members": true,
+      "bots": false
+    },
+    "ids": {
+      "categoryId": "1409340647927713804",
+      "totalId": null,
+      "membersId": "1409340651665096808",
+      "botsId": null
+    }
   }
 }
