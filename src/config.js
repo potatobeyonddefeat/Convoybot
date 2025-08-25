@@ -61,6 +61,16 @@ module.exports = {
 	invites: {
 		preferredChannelId: process.env.INVITE_CHANNEL_ID || null,
 	},
+	memberCount: {
+		enabled: true,
+		categoryName: '📊 Server Stats',
+		format: {
+			total: 'All members: {total}',
+			members: 'Members: {members}',
+			bots: 'Bots: {bots}',
+		},
+		ids: { categoryId: null, totalId: null, membersId: null, botsId: null },
+	},
 	logging: { level: 'info' },
 	audit: {
 		enabled: true,

@@ -1,6 +1,7 @@
 const { PermissionFlagsBits, ChannelType } = require('discord.js');
 const { dmUser } = require('../utils/notifier');
 const { createOneTimeInvite } = require('../utils/invite');
+const { updateNames } = require('../utils/memberCount');
 
 const joinBuckets = new Map(); // guildId -> timestamps[]
 
@@ -101,6 +102,14 @@ module.exports = {
 				}
 			}
 		}
+
+		// Update member count
+		try {
+			const mc = client.config.memberCount;
+			if (mc?.enabled) {
+				await updateNames(member.guild, mc);
+			}
+		} catch {}
 
 		// Welcome only if not flagged by age check
 		if (!flagged) {

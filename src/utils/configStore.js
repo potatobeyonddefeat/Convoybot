@@ -37,55 +37,35 @@ function writeAll(obj) {
 	fs.writeFileSync(STORE_PATH, JSON.stringify(obj, null, 2));
 }
 
-function loadSecurity(defaults) {
+function sectionLoad(defaults, key) {
 	const all = readAll();
-	return deepMerge(defaults, all.security || {});
+	return deepMerge(defaults, all[key] || {});
 }
-
-function saveSecurity(security) {
+function sectionSave(value, key) {
 	const all = readAll();
-	all.security = security;
+	all[key] = value;
 	writeAll(all);
 }
-
-function updateSecurity(current, partial) {
+function sectionUpdate(current, partial, key) {
 	const updated = deepMerge(current, partial);
-	saveSecurity(updated);
+	sectionSave(updated, key);
 	return updated;
 }
 
-function loadWelcome(defaults) {
-	const all = readAll();
-	return deepMerge(defaults, all.welcome || {});
-}
+const loadSecurity = (d) => sectionLoad(d, 'security');
+const saveSecurity = (v) => sectionSave(v, 'security');
+const updateSecurity = (c, p) => sectionUpdate(c, p, 'security');
 
-function saveWelcome(welcome) {
-	const all = readAll();
-	all.welcome = welcome;
-	writeAll(all);
-}
+const loadWelcome = (d) => sectionLoad(d, 'welcome');
+const saveWelcome = (v) => sectionSave(v, 'welcome');
+const updateWelcome = (c, p) => sectionUpdate(c, p, 'welcome');
 
-function updateWelcome(current, partial) {
-	const updated = deepMerge(current, partial);
-	saveWelcome(updated);
-	return updated;
-}
+const loadAppeals = (d) => sectionLoad(d, 'appeals');
+const saveAppeals = (v) => sectionSave(v, 'appeals');
+const updateAppeals = (c, p) => sectionUpdate(c, p, 'appeals');
 
-function loadAppeals(defaults) {
-	const all = readAll();
-	return deepMerge(defaults, all.appeals || {});
-}
+const loadMemberCount = (d) => sectionLoad(d, 'memberCount');
+const saveMemberCount = (v) => sectionSave(v, 'memberCount');
+const updateMemberCount = (c, p) => sectionUpdate(c, p, 'memberCount');
 
-function saveAppeals(appeals) {
-	const all = readAll();
-	all.appeals = appeals;
-	writeAll(all);
-}
-
-function updateAppeals(current, partial) {
-	const updated = deepMerge(current, partial);
-	saveAppeals(updated);
-	return updated;
-}
-
-module.exports = { loadSecurity, saveSecurity, updateSecurity, deepMerge, loadWelcome, saveWelcome, updateWelcome, loadAppeals, saveAppeals, updateAppeals };
+module.exports = { loadSecurity, saveSecurity, updateSecurity, deepMerge, loadWelcome, saveWelcome, updateWelcome, loadAppeals, saveAppeals, updateAppeals, loadMemberCount, saveMemberCount, updateMemberCount };
